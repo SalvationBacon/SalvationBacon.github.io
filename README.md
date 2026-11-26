@@ -1,0 +1,12 @@
+# SalvationBacon Games
+
+The home page for my pixel-art browser games: https://salvationbacon.github.io/
+
+| Game | Play |
+|---|---|
+| 8-Bit Industry | https://salvationbacon.github.io/8-Bit-Industry/ |
+| Coin Cascade | https://salvationbacon.github.io/Coin-Cascade/ |
+| Fernhollow Farm | https://salvationbacon.github.io/fernhollow-farm/ |
+| Fernwing Hunt | Coming soon |
+
+One `index.html`, no build step. To add a game, copy a card in `index.html` and put its 192px icon in `icons/`.
