@@ -147,6 +147,27 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .tip-only[hidden]{display:none!important}
 @media (max-width:520px){ .tip{flex-direction:column;text-align:center} }
 
+/* suggestions */
+.suggest{background:var(--bg2);border:2px solid var(--teal);box-shadow:4px 4px 0 #000;padding:22px}
+.suggest h3{font-size:12px;color:var(--teal);line-height:1.6;margin-bottom:10px}
+.suggest>p{font-size:9px;line-height:2.1;color:var(--text2);margin-bottom:18px}
+.suggest form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.suggest label{display:flex;flex-direction:column;gap:8px;font-size:8px;color:var(--text2)}
+.suggest label.full{grid-column:1/-1}
+.suggest label small{color:var(--text3);font-size:7px}
+.suggest input,.suggest select,.suggest textarea{
+  font:inherit;font-size:9px;line-height:1.8;color:var(--text);background:#000;border:2px solid var(--border2);padding:10px;border-radius:0;width:100%;
+}
+.suggest textarea{min-height:120px;resize:vertical}
+.suggest input:focus,.suggest select:focus,.suggest textarea:focus{outline:none;border-color:var(--teal)}
+.suggest .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.suggest .row{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.suggest .btn{background:var(--teal)}
+.suggest .btn[disabled]{opacity:.6;cursor:wait}
+.suggest .msg{font-size:8px;line-height:2;color:var(--text2)}
+.suggest .msg.ok{color:var(--teal)} .suggest .msg.err{color:var(--amber)}
+@media (max-width:520px){ .suggest form{grid-template-columns:1fr} }
+
 /* how to play */
 .how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
 .how div{background:var(--bg2);border:2px solid var(--border);padding:16px;font-size:8px;line-height:2;color:var(--text2)}
@@ -295,8 +316,50 @@ footer a{color:var(--text2)}
   </details>
   <details>
     <summary>Can I give feedback or report a bug?</summary>
-    <div class="ans"><p>Yes please. Feedback is what makes these games better. Every game has its own page on <a href="https://github.com/SalvationBacon">my GitHub</a>, where you can open an issue.</p></div>
+    <div class="ans"><p>Yes please. Feedback is what makes these games better. Use the <a href="#suggest">suggestion box</a> below, or open an issue on that game's page on <a href="https://github.com/SalvationBacon">my GitHub</a>.</p></div>
   </details>
+</div>
+</section>
+
+<section id="suggest">
+<div class="sec"><span class="n">&gt;</span> SUGGESTIONS</div>
+<div class="suggest">
+  <h3>GOT AN IDEA?</h3>
+  <p>A new game, a feature, something that feels off, or a bug. Tell me here and it goes straight to my inbox. I read every one.</p>
+  <form id="suggestForm" novalidate>
+    <label>GAME
+      <select name="game">
+        <option>Any / general</option>
+        <option>8-Bit Industry</option>
+        <option>Coin Cascade</option>
+        <option>Fernhollow Farm</option>
+        <option>Fernwing Hunt</option>
+        <option>A brand-new game</option>
+      </select>
+    </label>
+    <label>TYPE
+      <select name="type">
+        <option>Idea</option>
+        <option>Bug</option>
+        <option>Feedback</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label class="full">YOUR SUGGESTION
+      <textarea name="message" maxlength="3000" required placeholder="What would make it better?"></textarea>
+    </label>
+    <label>NAME <small>OPTIONAL</small>
+      <input name="name" maxlength="80" autocomplete="nickname">
+    </label>
+    <label>EMAIL <small>OPTIONAL, IF YOU WANT A REPLY</small>
+      <input name="email" type="email" maxlength="120" autocomplete="email">
+    </label>
+    <div class="hp" aria-hidden="true"><input name="_honey" tabindex="-1" autocomplete="off"></div>
+    <div class="row">
+      <button class="btn" type="submit">SEND IT</button>
+      <span class="msg" id="suggestMsg" role="status"></span>
+    </div>
+  </form>
 </div>
 </section>
 
@@ -403,6 +466,39 @@ var TIP_URL='https://ko-fi.com/salvationbacon';
     '................',
     '................',
     '................'],{K:'#0d0d0d',R:'#f5a623',W:'#ffe9b8'});
+})();
+// suggestion box: sends to the inbox below through FormSubmit (formsubmit.co)
+var SUGGEST_EMAIL='salvationbaconn@gmail.com';
+(function(){
+  var f=document.getElementById('suggestForm'),m=document.getElementById('suggestMsg');if(!f)return;
+  var b=f.querySelector('button');
+  function say(t,c){m.textContent=t;m.className='msg'+(c?' '+c:'');}
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var d=new FormData(f);
+    if(d.get('_honey'))return;
+    var text=String(d.get('message')||'').trim();
+    if(text.length<3){say('WRITE A SUGGESTION FIRST','err');f.message.focus();return;}
+    var email=String(d.get('email')||'').trim();
+    if(email&&!f.email.checkValidity()){say('THAT EMAIL LOOKS WRONG','err');f.email.focus();return;}
+    var body={
+      _subject:'Suggestion: '+d.get('type')+' · '+d.get('game'),
+      _template:'table',
+      game:d.get('game'),type:d.get('type'),message:text,
+      name:String(d.get('name')||'').trim()||'(not given)',
+      email:email||'(not given)'
+    };
+    if(email)body._replyto=email;
+    b.disabled=true;say('SENDING...');
+    fetch('https://formsubmit.co/ajax/'+SUGGEST_EMAIL,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(body)})
+      .then(function(r){return r.json().then(function(j){if(!r.ok||String(j.success)!=='true')throw 0;});})
+      .then(function(){f.reset();say('SENT, THANK YOU!','ok');})
+      .catch(function(){
+        var mail='mailto:'+SUGGEST_EMAIL+'?subject='+encodeURIComponent(body._subject)+'&body='+encodeURIComponent(text);
+        m.className='msg err';m.innerHTML='COULDN\'T SEND. <a href="'+mail+'">EMAIL IT INSTEAD</a>';
+      })
+      .then(function(){b.disabled=false;});
+  });
 })();
 // share
 (function(){
