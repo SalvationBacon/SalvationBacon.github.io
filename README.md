@@ -1,6 +1,6 @@
 # SalvationBacon Games
 
-The home page for my pixel-art browser games: https://salvationbacon.github.io/
+The home page for my pixel-art browser games, designed by me and coded by Claude (AI): https://salvationbacon.github.io/
 
 | Game | Play |
 |---|---|
